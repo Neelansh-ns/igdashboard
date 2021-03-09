@@ -73,6 +73,12 @@ functions:
       - httpApi:
           path: /userDetails
           method: get
+  hello3:
+    handler: handler3.hello3
+    events:
+      - httpApi:
+          path: /otherUserDetails
+          method: get
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)

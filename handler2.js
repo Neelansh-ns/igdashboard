@@ -172,13 +172,52 @@ const accessTokenCall = await new Promise((resolve, reject) => {
                   });
                 });
             });
+            
+            dataString = '';
+            //FETCH ACCOUNT INSIGHTS
+            const accountInsights = await new Promise((resolve, reject) => {
+                var until = Math.floor(Date.now() /1000);
+                var since = Math.floor((new Date().setDate(new Date().getDate() - 30))/1000);
+                console.log(until);
+                console.log(since);
+                const url = `${host}/${instaBusinessAccountId}/insights?until=${until}&since=${since}&period=day&metric=impressions,profile_views,reach&access_token=${accessToken}`;
+                const req = https.get(url, function(res) { 
+                  console.log(res);
+                  if(res.statusCode!=200){
+                    resolve({
+                        statusCode: 400,
+                        body: 'Error getting insta insights!'
+                    })
+                  }
+                  res.on('data', chunk => {
+                    dataString += chunk;
+                    console.log(dataString);
+                  });
+                  res.on('end', () => {
+                    resolve({
+                        statusCode: 200,
+                        body: JSON.parse(dataString),
+                        url : url
+                    });
+                  });
+                });
+                
+                req.on('error', (e) => {
+                  reject({
+                      statusCode: 500,
+                      body: 'Something went wrong!'
+                  });
+                });
+            });
 
     connection.end();
+    console.log('reached end');
     //Send API Response
     callback(null, {
         statusCode: '200',
         body: JSON.stringify({
-          'account': accountDetailResponse
+          'account': accountDetailResponse,
+          'insights' : accountInsights
         }),
         headers: {
           'Content-Type': 'application/json',
